@@ -1,0 +1,19 @@
+name: Rust Build CI
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+jobs:
+    rust:
+        name: Test Rust Build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Installing Rust
+              uses: actions-rust-lang/setup-rust-toolchain@v1
+            - name: Building with Cargo
+              uses: actions-rs/cargo@v1
+              with:
+                  command: build
+                  args: --release
