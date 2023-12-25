@@ -175,8 +175,6 @@ async fn axum(
     #[shuttle_turso::Turso(addr = "{secrets.DB_TURSO_URI}", token = "{secrets.DB_TURSO_TOKEN}", local_addr = "{secrets.DB_TURSO_URI}")]
     sql_client: Client,
 ) -> shuttle_axum::ShuttleAxum {
-    sql_client.execute("CREATE TABLE IF NOT EXISTS interest (id TEXT PRIMARY KEY, name TEXT, email TEXT, contact_no TEXT, uni_id TEXT, uni_name TEXT, where_you_reside TEXT, created_at TEXT)").await.unwrap();
-
     let sql_client = sql_client;
     let ev_state: Arc<EnvStore> = Arc::new(EnvStore {
         rpay_id: secret_store.get("RAZOR_PAY_KEY_ID").unwrap(),
@@ -189,7 +187,7 @@ async fn axum(
     });
 
     let router = Router::new()
-        .route("/hello", get(hello_world))
+        .route("/", get(hello_world))
         .route("/order", post(generate_order))
         .route("/interest", post(register_interest))
         .with_state(state);
