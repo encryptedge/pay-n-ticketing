@@ -7,6 +7,7 @@ use axum::{
     Router
 };
 use shuttle_secrets::SecretStore;
+use tower_http::cors::{CorsLayer, Any};
 
 async fn hello_world() -> &'static str {
     "Hello, World!"
@@ -18,6 +19,7 @@ async fn main(
     #[shuttle_turso::Turso(addr = "{secrets.DB_TURSO_URI}", token = "{secrets.DB_TURSO_TOKEN}", local_addr = "{secrets.DB_TURSO_URI}")]
     sql_client: Client,
 ) -> shuttle_axum::ShuttleAxum {
+    
     let sql_client = sql_client;
     let ev_state: Arc<EnvStore> = Arc::new(EnvStore {
         rpay_id: secret_store.get("RAZOR_PAY_KEY_ID").unwrap(),
@@ -29,11 +31,17 @@ async fn main(
         env_store: ev_state,
     });
 
+    let cors = CorsLayer::new()
+        .allow_methods(Any)
+        .allow_headers(Any)
+        .allow_origin(Any);
+
     let router = Router::new()
         .route("/", get(hello_world))
         .route("/order", post(generate_order))
         .route("/interest", post(register_interest))
-        .with_state(state);
+        .with_state(state)
+        .layer(cors);
 
     Ok(router.into())
 }
