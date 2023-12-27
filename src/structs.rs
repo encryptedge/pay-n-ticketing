@@ -14,7 +14,7 @@ pub struct CreateInterestRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CreateOrderResponse {
+pub struct RazorPayOrderResponse {
     pub id: String,
     pub entity: String,
     pub amount: Number,

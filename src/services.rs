@@ -1,5 +1,5 @@
 use crate::structs::*;
-use axum::extract::{State, Json};
+use axum::extract::{State, Json, Path};
 use reqwest::StatusCode;
 use serde_json::Number;
 use uuid::Uuid;
@@ -11,7 +11,7 @@ use libsql_client::{args, Statement};
 pub async fn generate_order(
     State(state): State<Arc<StateStore>>,
     Json(payload): Json<CreateOrderRequestUnParsed>,
-) -> Result<axum::Json<CreateOrderResponse>, StatusCode> {
+) -> Result<axum::Json<RazorPayOrderResponse>, StatusCode> {
     let rpay_key_id = &state.env_store.rpay_id;
     let rpay_key_secret = &state.env_store.rpay_secret;
 
@@ -40,11 +40,11 @@ pub async fn generate_order(
     };
 
     if payload.ticket_type == "student_pass" {
-        order_payload.amount = Number::from_f64(10000.0).unwrap();
-    } else if payload.ticket_type == "standard_pass" {
         order_payload.amount = Number::from_f64(20000.0).unwrap();
-    } else if payload.ticket_type == "professional_pass" {
+    } else if payload.ticket_type == "standard_pass" {
         order_payload.amount = Number::from_f64(30000.0).unwrap();
+    } else if payload.ticket_type == "professional_pass" {
+        order_payload.amount = Number::from_f64(40000.0).unwrap();
     } else {
         return Err(StatusCode::BAD_REQUEST);
     }
@@ -71,9 +71,48 @@ pub async fn generate_order(
     let response = request.send().await.unwrap();
     let body = response.text().await.unwrap();
 
-    let order: CreateOrderResponse = serde_json::from_str(&body).unwrap();
+    let order: RazorPayOrderResponse = serde_json::from_str(&body).unwrap();
 
     Ok(axum::Json(order))
+}
+
+pub async fn check_payments(
+    State(state): State<Arc<StateStore>>,
+    Path(order_id): Path<String>,
+) -> String {
+    let rpay_key_id = &state.env_store.rpay_id;
+    let rpay_key_secret = &state.env_store.rpay_secret;
+
+    let pre_key = format!("{}:{}", rpay_key_id, rpay_key_secret);
+    let encoded_key = general_purpose::STANDARD_NO_PAD.encode(pre_key.as_bytes());
+
+    let client = reqwest::Client::builder()
+        .build().unwrap();
+
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert("Content-Type", "application/json".parse().unwrap());
+    headers.insert("Authorization", format!("Basic {}", encoded_key).parse().unwrap());
+
+    let request = client.request(reqwest::Method::GET, format!("https://api.razorpay.com/v1/orders/{}", order_id))
+        .headers(headers);
+
+    let response = request.send().await.unwrap();
+    if response.status() != StatusCode::OK {
+        return format!("FAIL!");
+    }
+
+    let body = response.text().await.unwrap();
+    let order: RazorPayOrderResponse = serde_json::from_str(&body).unwrap();
+
+    if order.status == "paid" {
+        let sql_client = &state.sql_client;
+        sql_client.execute(
+            Statement::with_args("UPDATE ticket set id_paid = true WHERE id = ?", args![order.notes.notes_key_1])
+        ).await.unwrap();
+        return format!("OK!")
+    } else {
+        return format!("FAIL!")
+    }
 }
 
 pub async fn register_interest(

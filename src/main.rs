@@ -20,8 +20,6 @@ async fn main(
     #[shuttle_turso::Turso(addr = "{secrets.DB_TURSO_URI}", token = "{secrets.DB_TURSO_TOKEN}", local_addr = "{secrets.DB_TURSO_URI}")]
     sql_client: Client,
 ) -> shuttle_axum::ShuttleAxum {
-    tracing_subscriber::fmt::init();
-
     let sql_client = sql_client;
     let ev_state: Arc<EnvStore> = Arc::new(EnvStore {
         rpay_id: secret_store.get("RAZOR_PAY_KEY_ID").unwrap(),
@@ -43,6 +41,7 @@ async fn main(
         .route("/", get(hello_world))
         .route("/order", post(generate_order))
         .route("/interest", post(register_interest))
+        .route("/check-pay/:order_id", get(check_payments))
         .with_state(state)
         .layer(cors);
 
