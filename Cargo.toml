@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 axum = "0.6.20"
 shuttle-axum = "0.35.0"
-shuttle-runtime = "0.35.2"
+shuttle-runtime = { version = "0.35.0", default-features = false }
 shuttle-secrets = "0.35.2"
 libsql-client = "0.31.0"
 shuttle-turso = "0.35.0"
@@ -21,6 +21,7 @@ tower = "0.4.13"
 tower-http = { version = "0.4.0", features = ["cors", "fs"] }
 axum-extra = { version = "0.9.0" }
 http = "1.0.0"
+tracing-subscriber = "0.3.8"
 
 [dependencies.uuid]
 version = "1.6.1"
