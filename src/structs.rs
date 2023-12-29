@@ -63,10 +63,28 @@ pub struct CreateOrderNotes {
 pub struct EnvStore {
     pub rpay_id: String,
     pub rpay_secret: String,
+    pub mailer_username: String,
+    pub mailer_password: String,
+    pub mailer_url: String,
 }
 
 #[derive(Debug)]
 pub struct StateStore {
     pub sql_client: Client,
     pub env_store: Arc<EnvStore>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateTicketMailingRequest {
+    pub payee_name: String,
+    pub payee_email: String,
+    pub payee_ticket_id: String,
+    pub ticket_type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MailerAuth {
+    pub mailer_url: String,
+    pub username: String,
+    pub password: String,
 }

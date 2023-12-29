@@ -24,6 +24,9 @@ async fn main(
     let ev_state: Arc<EnvStore> = Arc::new(EnvStore {
         rpay_id: secret_store.get("RAZOR_PAY_KEY_ID").unwrap(),
         rpay_secret: secret_store.get("RAZOR_PAY_KEY_SECRET").unwrap(),
+        mailer_username: secret_store.get("MAILER_USERNAME").unwrap(),
+        mailer_password: secret_store.get("MAILER_PASSWORD").unwrap(),
+        mailer_url: secret_store.get("MAILER_URL").unwrap(),
     });
 
     let state = Arc::new(StateStore {
