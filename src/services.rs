@@ -1,4 +1,4 @@
-use crate::structs::*;
+use crate::{structs::*, mailer::send_ticket};
 use axum::extract::{State, Json, Path};
 use reqwest::StatusCode;
 use serde_json::Number;
@@ -73,6 +73,10 @@ pub async fn generate_order(
 
     let order: RazorPayOrderResponse = serde_json::from_str(&body).unwrap();
 
+    sql_client.execute(
+        Statement::with_args("UPDATE ticket set order_id = ? WHERE id = ?", args![order.id.clone(), id])
+    ).await.unwrap();
+
     Ok(axum::Json(order))
 }
 
@@ -80,6 +84,9 @@ pub async fn check_payments(
     State(state): State<Arc<StateStore>>,
     Path(order_id): Path<String>,
 ) -> String {
+    let current_date = chrono::Local::now();
+    let current_ts = current_date.timestamp();
+    let ticket_id = format!("RCSCTF2024T{}", current_ts.to_string());
     let rpay_key_id = &state.env_store.rpay_id;
     let rpay_key_secret = &state.env_store.rpay_secret;
 
@@ -107,9 +114,26 @@ pub async fn check_payments(
     if order.status == "paid" {
         let sql_client = &state.sql_client;
         sql_client.execute(
-            Statement::with_args("UPDATE ticket set id_paid = true WHERE id = ?", args![order.notes.notes_key_1])
+            Statement::with_args("UPDATE ticket set is_paid = true, ticket_id = ? WHERE id = ?", args![ticket_id.clone(), order.notes.notes_key_1.clone()])
         ).await.unwrap();
-        return format!("OK!")
+        let ticket = sql_client.execute(
+            Statement::with_args("SELECT email, name, ticket_type  FROM ticket WHERE id = ?", args![order.notes.notes_key_1])
+        ).await.unwrap();
+        let ticket = ticket.rows;
+        let ticket = ticket[0].clone();
+        let ticket: CreateTicketMailingRequest = CreateTicketMailingRequest {
+            payee_email: ticket.values[0].clone().to_string(),
+            payee_name: ticket.values[1].clone().to_string(),
+            payee_ticket_id: ticket_id.clone(),
+            ticket_type: ticket.values[2].clone().to_string(),
+        };
+        let mailer_auth = MailerAuth {
+            username: state.env_store.mailer_username.clone(),
+            password: state.env_store.mailer_password.clone(),
+            mailer_url: state.env_store.mailer_url.clone(),
+        };
+        let mailer = send_ticket(ticket, mailer_auth).await;
+        return mailer
     } else {
         return format!("FAIL!")
     }
