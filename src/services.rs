@@ -35,7 +35,8 @@ pub async fn generate_order(
         receipt: "EECTF".to_string(),
         notes: CreateOrderNotes {
             notes_key_1: id.clone(),
-            notes_key_2: payload.ticket_type.clone()
+            notes_key_2: payload.ticket_type.clone(),
+            notes_key_3: "RCSCTF2024".to_string(),
         }
     };
 
@@ -60,7 +61,8 @@ pub async fn generate_order(
         "receipt": order_payload.receipt,
         "notes": {
             "notes_key_1": order_payload.notes.notes_key_1,
-            "notes_key_2": order_payload.notes.notes_key_2
+            "notes_key_2": order_payload.notes.notes_key_2,
+            "notes_key_3": order_payload.notes.notes_key_3
         }
     });
 

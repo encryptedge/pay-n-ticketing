@@ -56,7 +56,8 @@ pub struct CreateOrderRequest {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateOrderNotes {
     pub notes_key_1: String,
-    pub notes_key_2: String
+    pub notes_key_2: String,
+    pub notes_key_3: String
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
