@@ -41,11 +41,11 @@ pub async fn generate_order(
     };
 
     if payload.ticket_type == "student_pass" {
-        order_payload.amount = Number::from_f64(20000.0).unwrap();
+        order_payload.amount = Number::from_f64(25000.0).unwrap();
     } else if payload.ticket_type == "standard_pass" {
-        order_payload.amount = Number::from_f64(30000.0).unwrap();
+        order_payload.amount = Number::from_f64(35000.0).unwrap();
     } else if payload.ticket_type == "professional_pass" {
-        order_payload.amount = Number::from_f64(40000.0).unwrap();
+        order_payload.amount = Number::from_f64(50000.0).unwrap();
     } else {
         return Err(StatusCode::BAD_REQUEST);
     }
