@@ -35,16 +35,17 @@ pub async fn generate_order(
         receipt: "EECTF".to_string(),
         notes: CreateOrderNotes {
             notes_key_1: id.clone(),
-            notes_key_2: payload.ticket_type.clone()
+            notes_key_2: payload.ticket_type.clone(),
+            notes_key_3: "RCSCTF2024".to_string(),
         }
     };
 
     if payload.ticket_type == "student_pass" {
-        order_payload.amount = Number::from_f64(20000.0).unwrap();
+        order_payload.amount = Number::from_f64(25000.0).unwrap();
     } else if payload.ticket_type == "standard_pass" {
-        order_payload.amount = Number::from_f64(30000.0).unwrap();
+        order_payload.amount = Number::from_f64(35000.0).unwrap();
     } else if payload.ticket_type == "professional_pass" {
-        order_payload.amount = Number::from_f64(40000.0).unwrap();
+        order_payload.amount = Number::from_f64(50000.0).unwrap();
     } else {
         return Err(StatusCode::BAD_REQUEST);
     }
@@ -60,7 +61,8 @@ pub async fn generate_order(
         "receipt": order_payload.receipt,
         "notes": {
             "notes_key_1": order_payload.notes.notes_key_1,
-            "notes_key_2": order_payload.notes.notes_key_2
+            "notes_key_2": order_payload.notes.notes_key_2,
+            "notes_key_3": order_payload.notes.notes_key_3
         }
     });
 
