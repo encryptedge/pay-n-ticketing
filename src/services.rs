@@ -108,7 +108,8 @@ pub async fn check_payments(
 
     let response = request.send().await.unwrap();
     if response.status() != StatusCode::OK {
-        return format!("FAIL!");
+        return format!("FAIL for Razorpay Fetch!");
+        // return response.text().await.unwrap();
     }
 
     let body = response.text().await.unwrap();
@@ -143,19 +144,24 @@ pub async fn check_payments(
             notes_key_4: Some(ticket_id.clone()),
         };
 
-        let request = client.request(reqwest::Method::PATCH, format!("https://api.razorpay.com/v1/orders/{}", order_id))
+        let updated_notes = RazorpayPaymentNotesUpdate {
+            notes: updated_notes,
+        };
+
+        let request = client.request(reqwest::Method::PATCH, format!("https://api.razorpay.com/v1/orders/{}", order.id))
             .headers(headers)
             .json(&updated_notes);
 
         let response = request.send().await.unwrap();
         if response.status() != StatusCode::OK {
-            return format!("FAIL!");
+            // return format!("FAIL for Update Razorpay!");
+            return response.text().await.unwrap();
         }
 
         let mailer = send_ticket(ticket, mailer_auth).await;
         return mailer
     } else {
-        return format!("FAIL!")
+        return format!("FAIL, order not paid!!")
     }
 }
 
