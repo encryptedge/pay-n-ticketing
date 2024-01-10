@@ -61,6 +61,11 @@ pub struct CreateOrderNotes {
     pub notes_key_4: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RazorpayPaymentNotesUpdate {
+    pub notes: CreateOrderNotes,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EnvStore {
     pub rpay_id: String,
