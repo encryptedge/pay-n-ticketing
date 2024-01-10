@@ -57,7 +57,8 @@ pub struct CreateOrderRequest {
 pub struct CreateOrderNotes {
     pub notes_key_1: String,
     pub notes_key_2: String,
-    pub notes_key_3: String
+    pub notes_key_3: String,
+    pub notes_key_4: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -81,6 +82,7 @@ pub struct CreateTicketMailingRequest {
     pub payee_email: String,
     pub payee_ticket_id: String,
     pub ticket_type: String,
+    pub id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

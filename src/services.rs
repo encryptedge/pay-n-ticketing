@@ -37,6 +37,7 @@ pub async fn generate_order(
             notes_key_1: id.clone(),
             notes_key_2: payload.ticket_type.clone(),
             notes_key_3: "RCSCTF2024".to_string(),
+            notes_key_4: None,
         }
     };
 
@@ -103,7 +104,7 @@ pub async fn check_payments(
     headers.insert("Authorization", format!("Basic {}", encoded_key).parse().unwrap());
 
     let request = client.request(reqwest::Method::GET, format!("https://api.razorpay.com/v1/orders/{}", order_id))
-        .headers(headers);
+        .headers(headers.clone());
 
     let response = request.send().await.unwrap();
     if response.status() != StatusCode::OK {
@@ -119,7 +120,7 @@ pub async fn check_payments(
             Statement::with_args("UPDATE ticket set is_paid = true, ticket_id = ? WHERE id = ?", args![ticket_id.clone(), order.notes.notes_key_1.clone()])
         ).await.unwrap();
         let ticket = sql_client.execute(
-            Statement::with_args("SELECT email, name, ticket_type  FROM ticket WHERE id = ?", args![order.notes.notes_key_1])
+            Statement::with_args("SELECT email, name, ticket_type, id  FROM ticket WHERE id = ?", args![order.notes.notes_key_1])
         ).await.unwrap();
         let ticket = ticket.rows;
         let ticket = ticket[0].clone();
@@ -128,12 +129,29 @@ pub async fn check_payments(
             payee_name: ticket.values[1].clone().to_string(),
             payee_ticket_id: ticket_id.clone(),
             ticket_type: ticket.values[2].clone().to_string(),
+            id: ticket.values[3].clone().to_string(),
         };
         let mailer_auth = MailerAuth {
             username: state.env_store.mailer_username.clone(),
             password: state.env_store.mailer_password.clone(),
             mailer_url: state.env_store.mailer_url.clone(),
         };
+        let updated_notes = CreateOrderNotes {
+            notes_key_1: ticket.id.clone(),
+            notes_key_2: ticket.ticket_type.clone(),
+            notes_key_3: "RCSCTF2024".to_string(),
+            notes_key_4: Some(ticket_id.clone()),
+        };
+
+        let request = client.request(reqwest::Method::PATCH, format!("https://api.razorpay.com/v1/orders/{}", order_id))
+            .headers(headers)
+            .json(&updated_notes);
+
+        let response = request.send().await.unwrap();
+        if response.status() != StatusCode::OK {
+            return format!("FAIL!");
+        }
+
         let mailer = send_ticket(ticket, mailer_auth).await;
         return mailer
     } else {
