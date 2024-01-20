@@ -59,6 +59,7 @@ pub struct CreateOrderNotes {
     pub notes_key_2: String,
     pub notes_key_3: String,
     pub notes_key_4: Option<String>,
+    pub notes_key_5: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

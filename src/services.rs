@@ -38,6 +38,7 @@ pub async fn generate_order(
             notes_key_2: payload.ticket_type.clone(),
             notes_key_3: "RCSCTF2024".to_string(),
             notes_key_4: None,
+            notes_key_5: payload.ticket_data.name.clone(),
         }
     };
 
@@ -63,7 +64,8 @@ pub async fn generate_order(
         "notes": {
             "notes_key_1": order_payload.notes.notes_key_1,
             "notes_key_2": order_payload.notes.notes_key_2,
-            "notes_key_3": order_payload.notes.notes_key_3
+            "notes_key_3": order_payload.notes.notes_key_3,
+            "notes_key_5": order_payload.notes.notes_key_5,
         }
     });
 
@@ -142,6 +144,7 @@ pub async fn check_payments(
             notes_key_2: ticket.ticket_type.clone(),
             notes_key_3: "RCSCTF2024".to_string(),
             notes_key_4: Some(ticket_id.clone()),
+            notes_key_5: ticket.payee_name.clone(),
         };
 
         let updated_notes = RazorpayPaymentNotesUpdate {
