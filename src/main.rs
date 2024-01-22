@@ -27,6 +27,7 @@ async fn main(
         mailer_username: secret_store.get("MAILER_USERNAME").unwrap(),
         mailer_password: secret_store.get("MAILER_PASSWORD").unwrap(),
         mailer_url: secret_store.get("MAILER_URL").unwrap(),
+        fetch_token: secret_store.get("FETCH_KEY").unwrap(),
     });
 
     let state = Arc::new(StateStore {
@@ -45,6 +46,7 @@ async fn main(
         .route("/order", post(generate_order))
         .route("/interest", post(register_interest))
         .route("/check-pay/:order_id", get(check_payments))
+        .route("/sold-tickets", get(fetch_all_paid_tickets))
         .with_state(state)
         .layer(cors);
 

@@ -74,6 +74,7 @@ pub struct EnvStore {
     pub mailer_username: String,
     pub mailer_password: String,
     pub mailer_url: String,
+    pub fetch_token: String,
 }
 
 #[derive(Debug)]
@@ -96,4 +97,23 @@ pub struct MailerAuth {
     pub mailer_url: String,
     pub username: String,
     pub password: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PaidTicket {
+    pub id: String,
+    pub name: String,
+    pub email: String,
+    pub contact_no: String,
+    pub uni_id: String,
+    pub uni_name: String,
+    pub where_you_reside: String,
+    pub ticket_type: String,
+    pub is_paid: String,
+    pub ticket_id: String,
+}
+
+#[derive(Deserialize)]
+pub struct PageAuth {
+    pub key: String,
 }

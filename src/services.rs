@@ -1,5 +1,5 @@
 use crate::{structs::*, mailer::send_ticket};
-use axum::extract::{State, Json, Path};
+use axum::extract::{State, Json, Path, Query};
 use reqwest::StatusCode;
 use serde_json::Number;
 use uuid::Uuid;
@@ -182,4 +182,35 @@ pub async fn register_interest(
         args![id, payload.name, payload.email, payload.contact_no, payload.uni_id, payload.uni_name, payload.where_you_reside, current_ts])
     ).await.unwrap();
     "OK!"
+}
+
+pub async fn fetch_all_paid_tickets(
+    State(state): State<Arc<StateStore>>,
+    Query(auth): Query<PageAuth>,
+) -> Result<axum::Json<Vec<PaidTicket>>, StatusCode> {
+    if auth.key != state.env_store.fetch_token {
+        return Err(StatusCode::UNAUTHORIZED);
+    }
+    let sql_client = &state.sql_client;
+    let tickets = sql_client.execute(
+        Statement::with_args("SELECT id, ticket_type, name, email, contact_no, uni_id, uni_name, where_you_reside, ticket_id, is_paid  FROM ticket WHERE is_paid = ?", args![1])
+    ).await.unwrap();
+    let tickets = tickets.rows;
+    let mut tickets_vec: Vec<PaidTicket> = Vec::new();
+    for ticket in tickets {
+        let ticket = PaidTicket {
+            id: ticket.values[0].clone().to_string(),
+            ticket_type: ticket.values[1].clone().to_string(),
+            name: ticket.values[2].clone().to_string(),
+            email: ticket.values[3].clone().to_string(),
+            contact_no: ticket.values[4].clone().to_string(),
+            uni_id: ticket.values[5].clone().to_string(),
+            uni_name: ticket.values[6].clone().to_string(),
+            where_you_reside: ticket.values[7].clone().to_string(),
+            ticket_id: ticket.values[8].clone().to_string(),
+            is_paid: ticket.values[9].clone().to_string(),
+        };
+        tickets_vec.push(ticket);
+    }
+    Ok(axum::Json(tickets_vec))
 }
