@@ -47,6 +47,7 @@ async fn main(
         .route("/interest", post(register_interest))
         .route("/check-pay/:order_id", get(check_payments))
         .route("/sold-tickets", get(fetch_all_paid_tickets))
+        .route("/unsold-tickets", get(fetch_all_unpaid_tickets))
         .with_state(state)
         .layer(cors);
 
