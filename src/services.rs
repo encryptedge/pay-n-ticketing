@@ -52,42 +52,43 @@ pub async fn generate_order(
         // order_payload.amount = Number::from_f64(50000.0).unwrap();
         return Err(StatusCode::BAD_REQUEST)
     } else if payload.ticket_type == "offline_pass" {
-        order_payload.amount = Number::from_f64(50000.0).unwrap();
+        // order_payload.amount = Number::from_f64(50000.0).unwrap();
+        return Err(StatusCode::BAD_REQUEST)
     } else {
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    sql_client.execute(Statement::with_args(
-        "INSERT INTO ticket (id, ticket_type, name, email, contact_no, uni_id, uni_name, where_you_reside, booked_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        args![id.clone(), payload.ticket_type.clone(), payload.ticket_data.name, payload.ticket_data.email, payload.ticket_data.contact_no, payload.ticket_data.uni_id, payload.ticket_data.uni_name, payload.ticket_data.where_you_reside, current_ts, current_ts])
-    ).await.unwrap();
+    // sql_client.execute(Statement::with_args(
+    //     "INSERT INTO ticket (id, ticket_type, name, email, contact_no, uni_id, uni_name, where_you_reside, booked_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    //     args![id.clone(), payload.ticket_type.clone(), payload.ticket_data.name, payload.ticket_data.email, payload.ticket_data.contact_no, payload.ticket_data.uni_id, payload.ticket_data.uni_name, payload.ticket_data.where_you_reside, current_ts, current_ts])
+    // ).await.unwrap();
 
-    let order_data: serde_json::Value = serde_json::json!({
-        "amount": order_payload.amount,
-        "currency": order_payload.currency,
-        "receipt": order_payload.receipt,
-        "notes": {
-            "notes_key_1": order_payload.notes.notes_key_1,
-            "notes_key_2": order_payload.notes.notes_key_2,
-            "notes_key_3": order_payload.notes.notes_key_3,
-            "notes_key_5": order_payload.notes.notes_key_5,
-        }
-    });
+    // let order_data: serde_json::Value = serde_json::json!({
+    //     "amount": order_payload.amount,
+    //     "currency": order_payload.currency,
+    //     "receipt": order_payload.receipt,
+    //     "notes": {
+    //         "notes_key_1": order_payload.notes.notes_key_1,
+    //         "notes_key_2": order_payload.notes.notes_key_2,
+    //         "notes_key_3": order_payload.notes.notes_key_3,
+    //         "notes_key_5": order_payload.notes.notes_key_5,
+    //     }
+    // });
 
-    let request = client.request(reqwest::Method::POST, "https://api.razorpay.com/v1/orders")
-        .headers(headers)
-        .json(&order_data);
+    // let request = client.request(reqwest::Method::POST, "https://api.razorpay.com/v1/orders")
+    //     .headers(headers)
+    //     .json(&order_data);
 
-    let response = request.send().await.unwrap();
-    let body = response.text().await.unwrap();
+    // let response = request.send().await.unwrap();
+    // let body = response.text().await.unwrap();
 
-    let order: RazorPayOrderResponse = serde_json::from_str(&body).unwrap();
+    // let order: RazorPayOrderResponse = serde_json::from_str(&body).unwrap();
 
-    sql_client.execute(
-        Statement::with_args("UPDATE ticket set order_id = ? WHERE id = ?", args![order.id.clone(), id])
-    ).await.unwrap();
+    // sql_client.execute(
+    //     Statement::with_args("UPDATE ticket set order_id = ? WHERE id = ?", args![order.id.clone(), id])
+    // ).await.unwrap();
 
-    Ok(axum::Json(order))
+    // Ok(axum::Json(order))
 }
 
 pub async fn check_payments(
